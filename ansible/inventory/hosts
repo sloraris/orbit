@@ -18,11 +18,15 @@ ubuntu:
     apollo3:
       ansible_host: 10.0.3.13
       ansible_user: 'ansible'
-    vm-docker:
-      ansible_host: 10.0.3.21
-      ansible_user: 'ansible'
   # ubuntu sub-groups
   children:
+    ansible_managed:
+      hosts:
+        vm-harrier:
+        luna:
+        apollo1:
+        apollo2:
+        apollo3:
     apollo_control:
       hosts:
         luna:
