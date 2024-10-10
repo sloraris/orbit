@@ -1,0 +1,31 @@
+---
+# Tasks to configure AdGuardHome
+
+# Check for existing adguard install
+- name: Check for adguard install
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: present
+  register: ag_service_exists
+
+# Check if adguard is running
+- name: Check state of adguard service
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: started
+  register: ag_service_running
+
+# Run adguard install/repair if it doesn't exist or isn't running
+- name: Install adguard
+  ansible.builtin.include_tasks:
+    file: adguard_install.yml
+  when: not ag_service_exists or not ag_service_running
+
+# Configure adguard
+- name: Deploy adguard configuration
+  ansible.builtin.template:
+    src: "{{ adguard_config_template }}"
+    dest: "{{ adguard_config_location }}"
+    mode: '0644'
+    lstrip_blocks: true
+  notify: Restart AdGuardHome

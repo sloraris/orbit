@@ -1,0 +1,36 @@
+---
+# Tasks to install or repair AdGuard Home
+
+
+# Check for existing adguard install
+- name: Check for adguard install
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: present
+  register: ag_service_exists
+
+## Download AdGuard archive
+- name: Download AdGuardHome archive
+  ansible.builtin.get_url:
+    url: "{{ adguard_src_url }}"
+    dest: "{{ adguard_archive_location }}"
+    mode: "0644"
+
+## Create AdGuard directory (if it does not already exist)
+- name: Unpack AdGuardHome archive
+  ansible.builtin.unarchive:
+    src: "{{ adguard_archive_location }}"
+    dest: "{{ adguard_dir_location }}"
+    extra_opts:
+      - ['--strip=1']
+
+# TODO: Check if device DNS settings are correct
+
+## Run install script if adguard does not exist and start adguard service
+- name: Install AdGuardHome
+  ansible.builtin.command:
+    cmd: AdGuardHome -s install
+    chdir: "{{ adguard_dir_location }}"
+    creates: "{{ adguard_service }}"
+  when: not ag_service_exists
+  notify: Start AdGuardHome

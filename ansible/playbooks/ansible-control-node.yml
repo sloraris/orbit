@@ -1,0 +1,37 @@
+---
+- name: Ansible Control Node Setup
+  hosts: atlas
+  become: true
+
+  roles:
+    - role: ansible
+    - role: github
+    - role: ubuntu
+
+  tasks:
+    - name: Ubuntu setup
+      ansible.builtin.include_tasks:
+        file: roles/ubuntu/tasks/ubuntu-setup.yml
+
+    - name: Install Ansible
+      ansible.builtin.include_tasks:
+        file: roles/ansible/tasks/install-ansible.yml
+
+    - name: Create local ssh key
+      community.crypto.openssh_keypair:
+        path: ~/.ssh/id_rsa
+        type: rsa
+        size: 4096
+        passphrase: ''
+        state: present
+        mode: '0600'
+
+    - name: Setup Github
+      ansible.builtin.include_tasks:
+        file: roles/github/tasks/connect-github.yml
+
+    - name: Pull orbit repo
+      ansible.builtin.git:
+        repo: https://github.com/sloraris/orbit.git
+        dest: /home/ansible/orbit
+        key_file: /home/ansible/.ssh/ansible-github-ssh

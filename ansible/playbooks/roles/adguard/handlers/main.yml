@@ -1,0 +1,20 @@
+---
+# handlers file for adguard
+
+- name: Start AdGuardHome
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: started
+    enabled: true
+
+- name: Restart AdGuardHome
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: restarted
+    enabled: true
+
+- name: Stop AdGuardHome
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: stopped
+    enabled: false

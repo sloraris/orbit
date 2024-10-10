@@ -1,0 +1,38 @@
+---
+# tasks file for ansible/roles/github
+
+- name: Install required system packages
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - curl
+    state: present
+    update_cache: true
+
+- name: Configure Github for ansible user
+  ansible.builtin.copy:
+    src: ~/.gitconfig
+    dest: /home/ansible/.gitconfig
+    mode: '0600'
+
+- name: Install Ansible Github SSH key
+  ansible.builtin.copy:
+    src: ~/.ssh/ansible-github-ssh
+    dest: /home/ansible/.ssh/ansible-github-ssh
+    mode: '0600'
+    owner: ansible
+    group: ansible
+
+- name: Add Github to SSH config file
+  ansible.builtin.blockinfile:
+    path: /home/ansible/.ssh/config
+    create: true
+    mode: '0600'
+    owner: ansible
+    group: ansible
+    block: |
+      Host github.com
+        HostName github.com
+        User git
+        IdentityFile ~/.ssh/ansible-github-ssh
+        IdentitiesOnly yes

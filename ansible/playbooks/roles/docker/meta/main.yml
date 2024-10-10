@@ -1,0 +1,13 @@
+galaxy_info:
+  author: sloraris
+  description: install docker and docker-compose on devices using apt package manager
+  license: MIT
+  min_ansible_version: '2.1'
+  platforms:
+    - name: Debian
+    - name: Ubuntu
+      version: 24.04
+
+  galaxy_tags:
+    - docker
+    - compose

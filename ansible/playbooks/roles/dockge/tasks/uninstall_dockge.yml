@@ -1,0 +1,14 @@
+---
+# tasks file for ansible/roles/dockge
+
+- name: Stop Dockge
+  community.docker.docker_compose_v2:
+    project_src: "{{ dockge_base_dir }}"
+    files:
+      - compose.yaml
+    state: absent
+
+- name: Remove Dockge directory
+  ansible.builtin.file:
+    path: "{{ dockge_base_dir }}"
+    state: absent

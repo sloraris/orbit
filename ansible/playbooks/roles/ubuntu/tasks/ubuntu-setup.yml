@@ -1,0 +1,24 @@
+---
+# tasks file for ansible/roles/ubuntu
+
+- name: Update apt
+  ansible.builtin.apt:
+    upgrade: true
+    update_cache: true
+
+- name: Install packages
+  ansible.builtin.apt:
+    pkg:
+      - git
+      - openssh-server
+      - openssh-client
+      - curl
+
+- name: Disable password login for root
+  ansible.builtin.set_fact:
+    root_password_login_disabled: true
+
+- name: Setup ansible user
+  ansible.builtin.include_role:
+    role: ansible
+    tasks_from: setup-users

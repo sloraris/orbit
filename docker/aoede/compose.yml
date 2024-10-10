@@ -1,0 +1,6 @@
+services:
+  aoede:
+    image: codetheweb/aoede
+    restart: always
+    volumes:
+      - /home/${USER}/aoede:/data

@@ -1,0 +1,21 @@
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: parker.owings@proton.me
+    privateKeySecretRef:
+      name: letsencrypt-staging
+    solvers:
+      - dns01:
+          cloudflare:
+            email: parker.owings@proton.me
+            apiTokenSecretRef:
+              name: cloudflare-credentials
+              key: apiToken
+        selector:
+          dnsZones:
+            - "sloraris.dev"

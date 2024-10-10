@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/issuer: rancher
+    cert-manager.io/issuer-kind: Issuer
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"networking.k8s.io/v1","kind":"Ingress","metadata":{"annotations":{"cert-manager.io/issuer":"rancher","cert-manager.io/issuer-kind":"Issuer","meta.helm.sh/release-name":"rancher","meta.helm.sh/release-namespace":"cattle-system","nginx.ingress.kubernetes.io/proxy-connect-timeout":"30","nginx.ingress.kubernetes.io/proxy-read-timeout":"1800","nginx.ingress.kubernetes.io/proxy-send-timeout":"1800"},"creationTimestamp":"2024-09-18T16:23:00Z","generation":3,"labels":{"app":"rancher","app.kubernetes.io/managed-by":"Helm","chart":"rancher-2.9.1","heritage":"Helm","release":"rancher"},"name":"rancher","namespace":"cattle-system","resourceVersion":"247294","uid":"6eef801c-6797-44b6-b6de-25043bc7a155"},"spec":{"ingressClassName":"traefik","rules":[{"host":"rancher.sloraris.dev","http":{"paths":[{"backend":{"service":{"name":"rancher","port":{"number":80}}},"path":"/","pathType":"ImplementationSpecific"}]}}],"tls":[{"hosts":["rancher.sloraris.dev"],"secretName":"sloraris-dev-tls"}]},"status":{"loadBalancer":{}}}
+    meta.helm.sh/release-name: rancher
+    meta.helm.sh/release-namespace: cattle-system
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "30"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+  creationTimestamp: "2024-09-18T16:23:00Z"
+  generation: 4
+  labels:
+    app: rancher
+    app.kubernetes.io/managed-by: Helm
+    chart: rancher-2.9.1
+    heritage: Helm
+    release: rancher
+  name: rancher
+  namespace: cattle-system
+  resourceVersion: "248803"
+  uid: 6eef801c-6797-44b6-b6de-25043bc7a155
+spec:
+  ingressClassName: traefik-external
+  rules:
+  - host: rancher.sloraris.dev
+    http:
+      paths:
+      - backend:
+          service:
+            name: rancher
+            port:
+              number: 80
+        path: /
+        pathType: ImplementationSpecific
+  tls:
+  - hosts:
+    - rancher.sloraris.dev
+    secretName: sloraris-dev-tls
+status:
+  loadBalancer: {}

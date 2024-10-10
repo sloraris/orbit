@@ -1,0 +1,14 @@
+galaxy_info:
+  author: sloraris
+  description: install ansible and setup ansible user
+  license: MIT
+  min_ansible_version: '2.1'
+  platforms:
+    - name: Debian
+    - name: Ubuntu
+      version: 24.04
+
+  galaxy_tags:
+    - control
+    - node
+    - ansible

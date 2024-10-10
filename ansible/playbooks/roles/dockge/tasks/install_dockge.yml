@@ -1,0 +1,27 @@
+---
+# tasks file for ansible/roles/dockge
+
+- name: Create Dockge directory
+  ansible.builtin.file:
+    path: "{{ dockge_base_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Create Dockge stacks directory
+  ansible.builtin.file:
+    path: "{{ dockge_base_dir }}/stacks"
+    state: directory
+    mode: '0755'
+
+- name: Copy Dockge compose.yaml to remote host
+  ansible.builtin.copy:
+    src: "{{ dockge_compose_src }}"
+    dest: "{{ dockge_base_dir }}/compose.yml"
+    mode: '0644'
+
+- name: Start Dockge
+  community.docker.docker_compose_v2:
+    project_src: "{{ dockge_base_dir }}"
+    files:
+      - compose.yml
+    state: present

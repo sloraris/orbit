@@ -1,0 +1,65 @@
+globalArguments:
+  - "--global.sendanonymoususage=false"
+  - "--global.checknewversion=false"
+
+additionalArguments:
+  - "--serversTransport.insecureSkipVerify=true"
+  - "--log.level=INFO"
+
+deployment:
+  enabled: true
+  replicas: 2
+  annotations: {}
+  podAnnotations: {}
+  additionalContainers: []
+  initContainers: []
+
+logs:
+# Configure log settings here...
+  general:
+    level: INFO
+
+ports:
+# Configure your entrypoints here...
+  web:
+    # (optional) Permanent Redirect to HTTPS
+    redirectTo:
+      port: websecure
+  websecure:
+    tls:
+      enabled: true
+    http3:
+      enabled: true
+
+# Disable Dashboard
+ingressRoute:
+  dashboard:
+    enabled: false
+
+# Set Traefik as your default Ingress Controller, according to Kubernetes 1.19+ changes.
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+
+# Enable SSL and default SSL Certificate
+ssl:
+  enabled: true
+  persistentVolume:
+    enabled: false
+  defaultCertificate:
+    enabled: true
+    permanent: true
+    secretName: sloraris-dev-tls
+
+rbac:
+  enabled: true
+
+service:
+  enabled: true
+  type: LoadBalancer
+  annotations: {}
+  labels: {}
+  spec:
+    loadBalancerIP: 10.0.3.10 # this should be an IP in the MetalLB range
+  loadBalancerSourceRanges: []
+  externalIPs: []

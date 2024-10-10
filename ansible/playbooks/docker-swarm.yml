@@ -1,0 +1,39 @@
+---
+- name: Initialize Docker Swarm and Add Workers
+  hosts: castor
+  become: true
+  tasks:
+    - name: Ensure Docker is installed on manager
+      ansible.builtin.package:
+        name: docker-ce
+        state: present
+
+    - name: Ensure python3-docker is installed
+      ansible.builtin.package:
+        name: python3-docker
+        state: present
+
+    - name: Initialize Docker Swarm
+      community.docker.docker_swarm:
+        state: present
+        advertise_addr: "{{ ansible_default_ipv4.address }}"
+      register: swarm_init
+
+    - name: Get worker join token
+      community.docker.docker_swarm_info:
+      register: swarm_info
+
+- name: Join worker nodes to the swarm
+  hosts: apollo_cluster
+  become: true
+  tasks:
+    - name: Ensure Docker is installed on workers
+      ansible.builtin.package:
+        name: docker-ce
+        state: present
+
+    - name: Join the swarm as a worker
+      community.docker.docker_swarm:
+        state: present
+        join_token: "{{ hostvars[groups['swarm_manager'][0]].swarm_info.swarm_facts.JoinTokens.Worker }}"
+        remote_addrs: "{{ hostvars[groups['swarm_manager'][0]].ansible_default_ipv4.address }}"

@@ -1,0 +1,38 @@
+---
+# Tasks to uninstall AdGuardHome
+
+# Check if AdGuard is installed, fail if not
+- name: Check for existing AdGuardHome install
+  ansible.builtin.fail:
+    msg: "AdGuard Home service is not installed on this device: {{ ansible_host }}"
+  when: not path.exists("/etc/systemd/system/AdGuardHome.service")
+
+# Stop AdGuardHome
+- name: Stop and disable AdGuardHome
+  ansible.builtin.service:
+    name: AdGuardHome
+    state: stopped
+    enabled: false
+
+# Remove AdGuardHome service
+- name: Remove AdGuardHome service
+  ansible.builtin.file:
+    path: "{{ adguard_service }}"
+    state: absent
+  become: true
+
+# TODO: Remove AdGuardHome directory
+- name: Remove AdGuardHome files
+  ansible.builtin.file:
+    path: "{{ adguard_dir_location }}"
+    state: absent
+  become: true
+
+# TODO: Remove AdGuardHome archive (if it exists)
+- name: Remove AdGuardHome archive
+  ansible.builtin.file:
+    path: "{{ adguard_archive_location }}"
+    state: absent
+  become: true
+
+# Change device DNS settings back to default

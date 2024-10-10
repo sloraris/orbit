@@ -1,0 +1,28 @@
+---
+# tasks file for ansible/roles/docker
+
+- name: Remove Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: stopped
+    enabled: false
+
+- name: Remove Docker packages
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: absent
+    purge: true
+
+- name: Remove Docker data
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+    force: true
+  loop:
+    - /var/lib/docker
+    - /var/lib/containerd

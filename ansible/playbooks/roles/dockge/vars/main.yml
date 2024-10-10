@@ -1,0 +1,5 @@
+---
+# vars file for ansible/roles/dockge
+
+dockge_base_dir: "/home/parker/dockge"
+dockge_compose_src: roles/dockge/files/compose.yml

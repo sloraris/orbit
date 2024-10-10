@@ -1,0 +1,9 @@
+---
+# defaults file for adguard
+adguard_dir_location: /home/parker/AdGuardHome
+adguard_src_url: "https://static.adguard.com/adguardhome/release/AdGuardHome_linux_armv6.tar.gz"
+adguard_archive_location: /tmp/AdGuardHome_linux_armv6.tar.gz
+adguard_service: /etc/systemd/system/AdGuardHome.service
+adguard_config_template: AdGuardHome.yaml.j2
+adguard_config_location: "{{ adguard_dir_location }}/AdGuardHome.yaml"
+adguard_upstream_dns: 10.0.0.1

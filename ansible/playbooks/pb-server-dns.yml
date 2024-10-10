@@ -1,0 +1,196 @@
+---
+- name: Recursive DNS Server
+  hosts: server_dns
+  become: true
+
+  pre_tasks:
+    - name: Check if NetworkManager connection profile exists
+      ansible.builtin.stat:
+        path: /etc/NetworkManager/system-connections/your_profile_name
+      register: profile_stat
+
+    - name: Profile exists message
+      ansible.builtin.debug:
+        msg: Profile exists. Please configure DNS manually.
+      when: profile_stat.stat.exists
+
+  tasks:
+    # Install needed packages
+    - name: Update and upgrade apt packages
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+
+    - name: Install prerequisites
+      ansible.builtin.apt:
+        name:
+          - wget
+          - tar
+          - dnsutils
+          - unbound
+          - uuid-runtime
+        state: present
+
+    # Setup Unbound
+    - name: Download Unbound config file
+      ansible.builtin.get_url:
+        url: "{{ unbound_config_url }}"
+        dest: /etc/unbound/unbound.conf.d/pi-hole.conf
+        mode: "0644"
+
+    # - name: Check for root.hints
+    #   ansible.builtin.stat:
+    #     path: /var/lib/unbound/root.hints
+    #   register: root_stat
+
+    # - name: Download root.hints (does not already exist)
+    #   ansible.builtin.get_url:
+    #     url: "{{ unbound_root_hints }}"
+    #     dest: /var/lib/unbound/root.hints
+    #     mode: "0644"
+    #   when: not root_hints.stat.exists
+
+    - name: Check if unbound-resolvconf service is active
+      ansible.builtin.systemd:
+        name: unbound-resolvconf
+        state: started
+      register: unbound_resolvconf_status
+      ignore_errors: true
+
+    - name: Disable unbound-resolvconf service
+      ansible.builtin.service:
+        name: unbound-resolvconf
+        state: stopped
+        enabled: false
+      when: not unbound_resolvconf_status.failed
+
+    - name: Check if /etc/resolvconf.conf exists
+      ansible.builtin.stat:
+        path: /etc/resolvconf.conf
+      register: dest_stat
+
+    - name: Comment out unbound_conf in /etc/resolvconf.conf
+      ansible.builtin.lineinfile:
+        path: /etc/resolvconf.conf
+        regexp: unbound_conf=
+        line: "#unbound_conf="
+        state: present
+      when: not unbound_resolvconf_status.failed and dest_stat.stat.exists
+
+    - name: Remove /etc/unbound/unbound.conf.d/resolvconf_resolvers.conf
+      ansible.builtin.file:
+        path: /etc/unbound/unbound.conf.d/resolvconf_resolvers.conf
+        state: absent
+      when: not unbound_resolvconf_status.failed
+
+    - name: Restart Unbound service
+      ansible.builtin.service:
+        name: unbound
+        state: restarted
+        enabled: true
+
+    # Setup AdGuard Home
+    - name: Check if Adguard exists
+      ansible.builtin.stat:
+        path: "{{ dns_base_path }}/AdGuardHome"
+      register: adguard_dir_stat
+
+    - name: Download AdGuard Home (does not exist on device)
+      ansible.builtin.get_url:
+        url: https://static.adguard.com/adguardhome/release/AdGuardHome_linux_armv6.tar.gz
+        dest: "{{ dns_base_path }}/."
+        mode: "0644"
+      when: not adguard_dir_stat.stat.exists
+
+    - name: Unpack Adguard
+      ansible.builtin.unarchive:
+        src: "{{ dns_base_path }}/AdGuardHome_linux_armv6.tar.gz"
+        dest: "{{ dns_base_path }}/AdGuardHome"
+      when: not adguard_dir_stat.stat.exists
+
+    - name: Install AdGuard (service does not exist)
+      ansible.builtin.command:
+        cmd: ./AdGuardHome -s install
+        chdir: "{{ dns_base_path }}"
+        creates: /etc/systemd/system/AdGuardHome.service
+      when: not adguard_dir_stat.stat.exists
+
+    - name: Start AdGuard
+      ansible.builtin.service:
+        name: AdGuardHome
+        state: started
+        enabled: true
+
+    - name: Download Adguard config file
+      ansible.builtin.get_url:
+        url: "{{ adguard_config_url }}"
+        dest: "{{ dns_base_path }}/AdGuardHome/AdGuardHome.yaml"
+        mode: "0644"
+        backup: true
+
+    - name: Set IP for AdGuard
+      ansible.builtin.replace:
+        path: "{{ dns_base_path }}/AdGuardHome/AdGuardHome.yaml"
+        regexp: 'PLACEHOLDER_IP'
+        replace: "{{ ansible_host }}"
+
+    - name: Set password for AdGuard
+      ansible.builtin.replace:
+        path: "{{ dns_base_path }}/AdGuardHome/AdGuardHome.yaml"
+        regexp: 'PLACEHOLDER_PSWD'
+        replace: "{{ adguard_pswd }}"
+
+    - name: Restart AdGuard Home
+      ansible.builtin.service:
+        name: AdGuardHome
+        state: restarted
+        enabled: true
+
+    # Setup DNS
+    - name: Check if wired connection profile exists
+      ansible.builtin.stat:
+        path: /etc/NetworkManager/system-connections/WiredConnection1.nmconnection
+      register: profile_stat
+
+    - name: Download NM template file
+      ansible.builtin.get_url:
+        url: "{{ nm_template_url }}"
+        dest: /etc/NetworkManager/system-connections/WiredConnection1.nmconnection
+        mode: "0755"
+        backup: true
+      when: not profile_stat.stat.exists
+
+    - name: Generate a new UUID and store it in a variable
+      ansible.builtin.command:
+        cmd: uuidgen
+      register: new_uuid
+      changed_when: new_uuid.rc != 0
+      when: not profile_stat.stat.exists
+
+    - name: Insert UUID into the connection profile
+      ansible.builtin.replace:
+        path: /etc/NetworkManager/system-connections/WiredConnection1.nmconnection
+        regexp: 'PLACEHOLDER_UUID'
+        replace: "{{ new_uuid.stdout }}"
+      when: not profile_stat.stat.exists
+
+    - name: Replace IPV4 settings (connection profile already exists)
+      ansible.builtin.lineinfile:
+        path: /etc/NetworkManager/system-connections/WiredConnection1.nmconnection
+        regexp: dns=*
+        line: "dns=127.0.0.1:53;"
+        state: present
+      when: profile_stat.stat.exists
+
+    - name: Restart NetworkManager to apply new configuration
+      ansible.builtin.service:
+        name: NetworkManager
+        state: restarted
+      when: not profile_stat.stat.exists
+
+    - name: Change active DNS settings
+      ansible.builtin.lineinfile:
+        path: /etc/resolv.conf
+        regexp: nameservers
+        line: "nameservers 127.0.0.1"
+        state: present
