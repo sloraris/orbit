@@ -1,6 +1,6 @@
 ---
 - name: Initialize Docker Swarm and Add Workers
-  hosts: castor
+  hosts: apollo_control
   become: true
   tasks:
     - name: Ensure Docker is installed on manager
