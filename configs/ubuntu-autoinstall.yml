@@ -1,0 +1,77 @@
+#cloud-config
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard:
+    layout: us
+
+  storage:
+    layout:
+      name: direct
+    config:
+      - type: disk
+        id: disk0
+        match:
+          size: largest
+        ptable: gpt
+        wipe: superblock
+        grub_device: true
+
+      - type: partition
+        id: boot-partition
+        device: disk0
+        size: 500M
+        flag: boot
+        grub_device: true
+
+      - type: partition
+        id: root-partition
+        device: disk0
+        size: -1
+
+      - type: format
+        id: boot-format
+        volume: boot-partition
+        fstype: ext4
+
+      - type: format
+        id: root-format
+        volume: root-partition
+        fstype: ext4
+
+      - type: mount
+        id: boot-mount
+        device: boot-format
+        path: /boot
+
+      - type: mount
+        id: root-mount
+        device: root-format
+        path: /
+
+  identity:
+    username: orbit
+    password: "l$6$XglfZI.S/0OWcodd$Lq1zZ/jFf7RjVjwNlCdOlNADk07ln8LMTHeqiUKkmYcdEQz4XJrqpVE6s3dWQUii/A.iF4.g0wgOcrcAv3ZR60"
+
+  ssh:
+    install-server: true
+    allow-pw: false
+    authorized-keys: []
+
+  packages:
+    - openssh-server
+
+  user-data:
+    timezone: America/Denver
+    disable_root: true
+    package_upgrade: true
+
+  late-commands:
+    - echo 'orbit ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/orbit
+    - chmod 440 /target/etc/sudoers.d/orbit
+    - curtin in-target --target=/target -- mkdir -p /home/orbit/.ssh
+    - curtin in-target --target=/target -- chown orbit:orbit /home/orbit/.ssh
+    - curtin in-target --target=/target -- chmod 700 /home/orbit/.ssh
+    - curtin in-target --target=/target -- sudo -u orbit wget -O /home/orbit/.ssh/authorized_keys https://github.com/sloraris.keys
+    - curtin in-target --target=/target -- chmod 600 /home/orbit/.ssh/authorized_keys
+    - curtin in-target --target=/target -- chown orbit:orbit /home/orbit/.ssh/authorized_keys
