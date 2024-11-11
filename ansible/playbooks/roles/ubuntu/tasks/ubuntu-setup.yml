@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible/roles/ubuntu
 
-- name: Update apt
+- name: Update apt cache and upgrade packages
   ansible.builtin.apt:
     upgrade: true
     update_cache: true
@@ -13,12 +13,26 @@
       - openssh-server
       - openssh-client
       - curl
+    update_cache: true
 
-- name: Disable password login for root
+- name: Disable password login for root and orbit
   ansible.builtin.set_fact:
     root_password_login_disabled: true
+    orbit_password_login_disabled: true
 
-- name: Setup ansible user
-  ansible.builtin.include_role:
-    role: ansible
-    tasks_from: setup-users
+- name: Configure passwordless sudo for user
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/{{ ansible_user }}
+    line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    mode: '0440'
+    create: true
+    validate: /usr/sbin/visudo -cf %s
+
+- name: Install orbit ssh key
+  ansible.builtin.copy:
+    dest: /home/orbit/.ssh/authorized_keys
+    content: "{{ lookup('file', '~/.ssh/orbit_key.pub') }}"
+    owner: orbit
+    group: orbit
+    mode: '0600'

@@ -1,0 +1,25 @@
+---
+# Playbook to deploy services to the swarm
+
+- name: Deploy services to swarm
+  hosts: apollo_control[0]
+  become: true
+  tasks:
+    - name: Ensure stack compose directory exists
+      ansible.builtin.file:
+        path: /opt/docker/stacks
+        state: directory
+        mode: '0755'
+
+    - name: Copy stack compose file
+      ansible.builtin.template:
+        src: templates/my-stack.yml.j2
+        dest: /opt/docker/stacks/my-stack.yml
+        mode: '0644'
+
+    - name: Deploy stack
+      community.docker.docker_stack:
+        state: present
+        name: myapp
+        compose:
+          - /opt/docker/stacks/my-stack.yml

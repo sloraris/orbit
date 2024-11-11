@@ -1,4 +1,5 @@
 ---
+# Setup steps for the ansible-terraform-kestra-actions control node
 - name: Ansible Control Node Setup
   hosts: atlas
   become: true
@@ -13,19 +14,6 @@
       ansible.builtin.include_tasks:
         file: roles/ubuntu/tasks/ubuntu-setup.yml
 
-    - name: Install Ansible
-      ansible.builtin.include_tasks:
-        file: roles/ansible/tasks/install-ansible.yml
-
-    - name: Create local ssh key
-      community.crypto.openssh_keypair:
-        path: ~/.ssh/id_rsa
-        type: rsa
-        size: 4096
-        passphrase: ''
-        state: present
-        mode: '0600'
-
     - name: Setup Github
       ansible.builtin.include_tasks:
         file: roles/github/tasks/connect-github.yml
@@ -35,3 +23,12 @@
         repo: https://github.com/sloraris/orbit.git
         dest: /home/ansible/orbit
         key_file: /home/ansible/.ssh/ansible-github-ssh
+
+    # TODO: install Github runner
+
+    - name: Install Ansible
+      ansible.builtin.include_tasks:
+        file: roles/ansible/tasks/install-ansible.yml
+
+    # TODO: install terraform
+    # TODO: install kestra

@@ -1,0 +1,4 @@
+LISTEN 127.0.0.1 {{ upsd_port | default('3493') }}
+{% if upsd_listen_address is defined %}
+LISTEN {{ upsd_listen_address }} {{ upsd_port | default('3493') }}
+{% endif %}

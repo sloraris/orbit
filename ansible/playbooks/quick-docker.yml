@@ -1,0 +1,11 @@
+---
+- name: Quick Docker Setup
+  hosts: docker
+  become: true
+  roles:
+    - docker
+
+  tasks:
+    - name: Install Docker
+      ansible.builtin.include_tasks:
+        file: roles/docker/tasks/install-docker.yml

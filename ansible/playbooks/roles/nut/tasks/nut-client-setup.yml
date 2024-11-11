@@ -1,0 +1,26 @@
+---
+# tasks file for ansible/roles/nut
+
+- name: Install NUT packages
+  ansible.builtin.package:
+    name: nut-client
+    state: present
+
+- name: Copy NUT configuration files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: nut
+    mode: '0640'
+  loop:
+    - { src: 'nut.conf.j2', dest: '/etc/nut/nut.conf' }
+    - { src: 'ups.conf.j2', dest: '/etc/nut/ups.conf' }
+    - { src: 'upsd.conf.j2', dest: '/etc/nut/upsd.conf' }
+    - { src: 'upsmon.conf.j2', dest: '/etc/nut/upsmon.conf' }
+
+- name: Start and enable NUT services
+  ansible.builtin.service:
+    name: nut-client
+    state: started
+    enabled: true

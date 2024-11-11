@@ -1,0 +1,46 @@
+---
+# Setup for new Ubuntu server -- to be run from Amperage
+
+- name: Quick Ubuntu Setup
+  hosts: ubuntu
+  become: true
+  roles:
+    - ubuntu
+
+  tasks:
+    - name: Ubuntu setup
+      ansible.builtin.include_tasks:
+        file: roles/ubuntu/tasks/ubuntu-setup.yml
+
+    - name: Try to update existing SSH config entry
+      become: false
+      ansible.builtin.replace:
+        path: "{{ lookup('env', 'HOME') }}/.ssh/config"
+        regexp: "(?ms)Host {{ ansible_hostname }}(?:(?!\\nHost\\s).)*?IdentityFile ~/.ssh/orbit_key"
+        replace: >-
+         Host {{ ansible_hostname }}
+            HostName {{ ansible_host }}
+            User {{ ansible_user }}
+            UseKeychain yes
+            AddKeysToAgent yes
+            IdentityFile ~/.ssh/orbit_key
+      delegate_to: 127.0.0.1
+      register: replace_result
+      failed_when: false
+      loop: "{{ groups['ubuntu'] }}"
+
+    - name: Remove and replace original SSH config entry
+      become: false
+      ansible.builtin.replace:
+        path: "{{ lookup('env', 'HOME') }}/.ssh/config"
+        regexp: "(?ms)Host {{ ansible_hostname }}(?:(?!\\nHost\\s).)*?IdentityFile ~/.ssh/id_rsa"
+        replace: >-
+         Host {{ ansible_hostname }}
+            HostName {{ ansible_host }}
+            User {{ ansible_user }}
+            UseKeychain yes
+            AddKeysToAgent yes
+            IdentityFile ~/.ssh/orbit_key
+      delegate_to: 127.0.0.1
+      when: not replace_result.changed
+      loop: "{{ groups['ubuntu'] }}"
