@@ -1,0 +1,4 @@
+---
+nut_server_host: 10.0.3.20
+nut_server_port: 3493
+nut_ups_name: ups-aurora

@@ -1,0 +1,4 @@
+[{{ nut_ups_name }}]
+driver = netclient
+port = {{ nut_server_host }}:{{ nut_server_port | default('3493') }}
+desc = "UPS connected to NAS"

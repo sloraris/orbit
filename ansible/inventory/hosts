@@ -1,50 +1,73 @@
-ubuntu:
+all:
   hosts:
     vm-harrier:
-      ansible_host: 10.0.2.10
-      ansible_user: 'parker'
-    atlas:
-      ansible_host: 10.0.3.5
-      ansible_user: 'ansible'
+      ansible_host: 10.0.1.10
+      ansible_user: 'orbit'
     luna:
-      ansible_host: 10.0.3.10
-      ansible_user: 'ansible'
-    apollo1:
-      ansible_host: 10.0.3.11
-      ansible_user: 'ansible'
-    apollo2:
-      ansible_host: 10.0.3.12
-      ansible_user: 'ansible'
-    apollo3:
-      ansible_host: 10.0.3.13
-      ansible_user: 'ansible'
-  # ubuntu sub-groups
+      ansible_host: 10.0.2.11
+      ansible_user: 'orbit'
+    # selene:
+    #   ansible_host: 10.0.2.12
+    #   ansible_user: 'orbit'
+    lander1:
+      ansible_host: 10.0.2.21
+      ansible_user: 'orbit'
+    lander2:
+      ansible_host: 10.0.2.22
+      ansible_user: 'orbit'
+    lander3:
+      ansible_host: 10.0.2.23
+      ansible_user: 'orbit'
+    aurora:
+      ansible_host: 10.0.3.20
+      ansible_user: 'orbit'
+    # stellar:
+    #   ansible_host:
+    #   ansible_user: 'orbit'
+
+
   children:
-    ansible_managed:
+    ubuntu:
       hosts:
         vm-harrier:
         luna:
-        apollo1:
-        apollo2:
-        apollo3:
+        # selene:
+        lander1:
+        lander2:
+        lander3:
+    truenas:
+      hosts:
+        aurora:
+        # stellar:
+    nut_client:
+      hosts:
+        aurora:
+        lander1:
+        lander2:
+        lander3:
     apollo_control:
       hosts:
         luna:
+        # selene:
     apollo_cluster:
       hosts:
-        apollo1:
-        apollo2:
-        apollo3:
+        lander1:
+        lander2:
+        lander3:
+    docker:
+      hosts:
+        luna:
+        # selene:
+        lander1:
+        lander2:
+        lander3:
 
 
-raspbian:
+raspberrypi:
   hosts:
     adguard:
       ansible_host: 10.0.0.11
-      ansible_user: 'parker'
-    blikvm:
-      ansible_host: 10.0.3.4
-      ansible_user: 'blikvm'
+      ansible_user: 'ansible'
     homebridge:
       ansible_host: 10.0.6.10
-      ansible_user: 'parker'
+      ansible_user: 'ansible'

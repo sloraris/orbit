@@ -1,0 +1,13 @@
+---
+# Setup steps for devices managed by ansible control node
+- name: Ansible managed devices setup
+  hosts: all
+  become: true
+  remote_user: parker
+  roles:
+    - role: ubuntu
+
+  tasks:
+    - name: Ubuntu setup
+      ansible.builtin.include_tasks:
+        file: roles/ubuntu/tasks/ubuntu-setup.yml

@@ -25,7 +25,7 @@
 - name: Add authorized key for ansible user
   ansible.builtin.copy:
     dest: /home/ansible/.ssh/authorized_keys
-    content: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    content: "{{ lookup('file', '~/.ssh/ansible_key.pub') }}"
     owner: ansible
     group: ansible
     mode: '0600'
