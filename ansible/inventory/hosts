@@ -6,9 +6,9 @@ all:
     luna:
       ansible_host: 10.0.2.11
       ansible_user: 'orbit'
-    # selene:
-    #   ansible_host: 10.0.2.12
-    #   ansible_user: 'orbit'
+    selene:
+      ansible_host: 10.0.2.12
+      ansible_user: 'orbit'
     lander1:
       ansible_host: 10.0.2.21
       ansible_user: 'orbit'
