@@ -28,10 +28,10 @@ Temporary Items
 .apdisk
 
 # Credential variable files/folders
-.auto.tfvars
-.tfvars
-.ssh
-.env
+*.auto.tfvars
+*.tfvars
+*.ssh
+*.env
 secrets*
 cred-*
 *.vault
