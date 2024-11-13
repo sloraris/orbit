@@ -1,7 +1,10 @@
 all:
   hosts:
-    vm-harrier:
+    castor:
       ansible_host: 10.0.1.10
+      ansible_user: 'orbit'
+    ghost:
+      ansible_host: 10.0.1.20
       ansible_user: 'orbit'
     luna:
       ansible_host: 10.0.2.11
@@ -29,9 +32,9 @@ all:
   children:
     ubuntu:
       hosts:
-        vm-harrier:
+        ghost:
         luna:
-        # selene:
+        selene:
         lander1:
         lander2:
         lander3:
@@ -48,7 +51,7 @@ all:
     apollo_control:
       hosts:
         luna:
-        # selene:
+        selene:
     apollo_cluster:
       hosts:
         lander1:
@@ -56,8 +59,10 @@ all:
         lander3:
     docker:
       hosts:
+        # castor:
+        ghost:
         luna:
-        # selene:
+        selene:
         lander1:
         lander2:
         lander3:
