@@ -27,9 +27,15 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Credential variable files/folders
+# Terraform
+.terraform
+.terraform.lock.hcl
 *.auto.tfvars
 *.tfvars
+*.tfstate
+*.tfstate.backup
+
+# Credential variable files/folders
 *.ssh
 *.env
 secrets*
